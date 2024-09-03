@@ -8,3 +8,6 @@ in progress started Sept 3, 2024.
 The goal is to practice and demonstrate concurrency
 in a web service that later I will wire up to
 a React frontend.
+
+To get started, I am building a simple service
+to factor an integer into primes.
