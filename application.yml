@@ -1,0 +1,24 @@
+spring:
+  profiles: 
+    active: dev
+  logging:
+    level:
+      root: DEBUG
+      org:
+        hibernate: DEBUG
+        springframework:
+          orm:
+            jpa: DEBUG
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+  secret-key: 1bef3f99d2bf4abda0c27a68821a728f1bef3f99d2bf4abda0c27a68821a728f1bef3f99d2bf4abda0c27a68821a728f
