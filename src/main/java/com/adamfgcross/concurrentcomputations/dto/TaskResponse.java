@@ -1,17 +1,30 @@
 package com.adamfgcross.concurrentcomputations.dto;
 
 public class TaskResponse {
-	private String taskId;
+	private Long id;
 
-	public TaskResponse(String taskId) {
-		this.taskId = taskId;
+	private Boolean isCompleted = false;
+	
+	public Boolean getIsCompleted() {
+		return isCompleted;
+	}
+
+	public void setIsCompleted(Boolean isCompleted) {
+		this.isCompleted = isCompleted;
+	}
+
+	public TaskResponse() {
 	}
 	
-	public String getTaskId() {
-		return taskId;
+	public TaskResponse(Long id) {
+		this.id = id;
+	}
+	
+	public Long getId() {
+		return id;
 	}
 
-	public void setTaskId(String taskId) {
-		this.taskId = taskId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 }
