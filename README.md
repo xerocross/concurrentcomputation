@@ -35,3 +35,13 @@ return a result something like this:
 The goal is to practice and demonstrate concurrency
 in a web service that later I will wire up to
 a React frontend.
+
+
+## TODO
+
+Some known elements I should improve upon and will
+given time.
+
+* Validation of integer input and error handling for bad inputs.
+* Support for large numbers.
+
