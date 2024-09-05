@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 @Entity
 public class IntFactorTask extends Task {
 
-	private String integerForFactoring;
+	private String number;
 	
 	private List<String> factors;
 
@@ -19,11 +19,11 @@ public class IntFactorTask extends Task {
 		this.factors = factors;
 	}
 
-	public String getIntegerForFactoring() {
-		return integerForFactoring;
+	public String getNumber() {
+		return number;
 	}
 
-	public void setIntegerForFactoring(String integerForFactoring) {
-		this.integerForFactoring = integerForFactoring;
+	public void setNumber(String number) {
+		this.number = number;
 	}
 }

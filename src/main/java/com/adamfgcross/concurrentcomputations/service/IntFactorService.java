@@ -1,5 +1,6 @@
 package com.adamfgcross.concurrentcomputations.service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class IntFactorService implements TaskService<IntFactorTaskRequest> {
 	
 	public Long submitTask(IntFactorTaskRequest intFactorTaskRequest) {
 		IntFactorTask intFactorTask = new IntFactorTask();
-		intFactorTask.setIntegerForFactoring(intFactorTaskRequest.getIntToFactor());
+		intFactorTask.setNumber(intFactorTaskRequest.getIntToFactor());
 		taskRepository.save(intFactorTask);
 		beginTask(intFactorTask);
 		return intFactorTask.getId();
@@ -53,7 +54,7 @@ public class IntFactorService implements TaskService<IntFactorTaskRequest> {
 	private IntFactorTaskResponse getTaskResponse(IntFactorTask intFactorTask) {
 		IntFactorTaskResponse intFactorTaskResponse = new IntFactorTaskResponse();
 		intFactorTaskResponse.setId(intFactorTask.getId());
-		intFactorTaskResponse.setNumber(intFactorTask.getIntegerForFactoring());
+		intFactorTaskResponse.setNumber(intFactorTask.getNumber());
 		intFactorTaskResponse.setFactors(intFactorTask.getFactors());
 		intFactorTaskResponse.setIsCompleted(intFactorTask.getIsCompleted());
 		return intFactorTaskResponse;
@@ -83,17 +84,22 @@ public class IntFactorService implements TaskService<IntFactorTaskRequest> {
 	}
 	
 	private IntFactorTaskContext getPrimeFactorization(IntFactorTaskContext intFactorTaskContext) {
-		Long inputInteger = intFactorTaskContext.getNumber();
+		String inputInteger = intFactorTaskContext.getNumber();
 		logger.info("starting to factor " + inputInteger);
-		List<Long> factors = new ArrayList<>();
-        for (long i = 2; i <= inputInteger / i; i++) {
-            while (inputInteger % i == 0) {
-                factors.add(i);
-                inputInteger /= i;
+		BigInteger number = new BigInteger(inputInteger);
+		
+		List<String> factors = new ArrayList<>();
+		for (BigInteger i = BigInteger.valueOf(2); i.compareTo(number.divide(i)) <= 0; i = i.add(BigInteger.valueOf(1))) {
+			logger.info("testing for factor at: " + i.toString());
+			while (number.mod(i).equals(BigInteger.valueOf(0)) ) {
+            	logger.info("found factor: " + i.toString());
+                factors.add(i.toString());
+                number = number.divide(i);
             }
         }
-        if (inputInteger > 1) {
-            factors.add(inputInteger);
+		if (number.compareTo(BigInteger.valueOf(1)) > 0) {
+			logger.info("found factor: " + number.toString());
+            factors.add(number.toString());
         }
         intFactorTaskContext.setFactors(factors);
         logger.info("finished factoring " + inputInteger);

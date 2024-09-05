@@ -9,14 +9,14 @@ public class IntFactorTaskContext {
 	
 	public IntFactorTaskContext(IntFactorTask intFactorTask) {
 		this.intFactorTask = intFactorTask;
-		String numberInput = intFactorTask.getIntegerForFactoring();
-		this.number = Long.parseLong(numberInput);
+		String numberInput = intFactorTask.getNumber();
+		this.number = numberInput;
 		
 	}
 	
-	private Long number;
+	private String number;
 	
-	private List<Long> factors;
+	private List<String> factors;
 	
 	private User user;
 	
@@ -32,19 +32,19 @@ public class IntFactorTaskContext {
 		this.intFactorTask = intFactorTask;
 	}
 
-	public Long getNumber() {
+	public String getNumber() {
 		return number;
 	}
 
-	public void setNumber(Long number) {
+	public void setNumber(String number) {
 		this.number = number;
 	}
 
-	public List<Long> getFactors() {
+	public List<String> getFactors() {
 		return factors;
 	}
 
-	public void setFactors(List<Long> factors) {
+	public void setFactors(List<String> factors) {
 		this.factors = factors;
 	}
 
