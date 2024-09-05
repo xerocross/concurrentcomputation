@@ -90,7 +90,6 @@ public class IntFactorService implements TaskService<IntFactorTaskRequest> {
 		
 		List<String> factors = new ArrayList<>();
 		for (BigInteger i = BigInteger.valueOf(2); i.compareTo(number.divide(i)) <= 0; i = i.add(BigInteger.valueOf(1))) {
-			logger.info("testing for factor at: " + i.toString());
 			while (number.mod(i).equals(BigInteger.valueOf(0)) ) {
             	logger.info("found factor: " + i.toString());
                 factors.add(i.toString());
