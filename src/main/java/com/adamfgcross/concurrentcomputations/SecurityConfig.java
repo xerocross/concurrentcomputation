@@ -52,8 +52,15 @@ public class SecurityConfig {
 				.anyRequest().hasRole("USER")
 			)
 			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())); 
+			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
+			.anonymous(anonymousConfigurer -> {
+				anonymousConfigurer
+					.key("secureKey")
+					.principal("anonymousUser")
+					.authorities("ROLE_ANONYMOUS");
+			}); 
 
 		return http.build();
 	}
+
 }
