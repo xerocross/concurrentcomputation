@@ -52,6 +52,24 @@ but I plan to add more meaty explorations and use of
 concurrency.
 
 
+## Current Tasks In Progress
+
+### Task Limits via User Registration and Anonymous Use
+
+I'm adding some limits on the tasks a user can
+initiate. This means adding a whole user
+authentication system (with **Spring Security**), but
+I also want to support some anonymous use to
+reduce friction for demonstrating the service. I
+for one hate having to register for literally
+everything on the Internet.
+
+I'm going to use **JWT** for authentication.
+
+I'll create some more delicate handling of threads
+to manage the tasks allowed for any one user.
+
+
 ## TODO
 
 Some known elements I should improve upon and will
