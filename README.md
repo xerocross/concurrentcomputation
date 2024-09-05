@@ -59,4 +59,6 @@ given time.
 
 * Validation of integer input and error handling for bad inputs.
 * Add testing.
+* Add ability to cancel a running task.
+* Add some limits on usage to prevent abuse.
 
