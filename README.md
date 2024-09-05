@@ -5,6 +5,15 @@ service that will perform various numerical
 computations using *concurrency*. This is a work
 in progress started Sept 3, 2024.
 
+Summary:
+
+* Web service built using **Spring Boot with Web MVC**;
+* Service computes prime factorization of
+large integers using Java's **BigInteger**.
+* Uses Spring's support for **asynchronous**
+computation to perform computation off the main
+request thread..
+
 So far, this service can accept a request at the
 endpoint `api/factor` to factor an integer into
 primes, which will be done asynchronously. If 
@@ -35,6 +44,12 @@ return a result something like this:
 The goal is to practice and demonstrate concurrency
 in a web service that later I will wire up to
 a React frontend.
+
+Another goal is to really dig into using concurrency.
+At the moment, I have started by using Spring's 
+support for Async methods and learned the value of that,
+but I plan to add more meaty explorations and use of
+concurrency.
 
 
 ## TODO
