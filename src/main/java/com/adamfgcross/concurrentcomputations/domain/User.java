@@ -1,6 +1,10 @@
 package com.adamfgcross.concurrentcomputations.domain;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,9 +21,10 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(name = "username", nullable = false)
+	@Column(name = "username")
 	private String username;
 	
+	@Column(unique = true)
 	private String tempKey;
 	
 	public String getTempKey() {
@@ -49,18 +54,30 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.emptyList();
+	}
+	
+	private Boolean isEnabled;
+	
+	public Boolean isEnabled() {
+		return isEnabled;
+	}
+	public void setIsEnabled(Boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
 	@Override
     public boolean equals(Object o) {
         if (this == o) return true; // Check if they are the same instance
         if (o == null || getClass() != o.getClass()) return false; // Check if o is null or not of the same class
         User user = (User) o; // Cast o to User and compare relevant fields
-        return Objects.equals(id, user.id) &&
-               Objects.equals(username, user.username);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username); // Generate hash code based on relevant fields
+        return Objects.hash(id); // Generate hash code based on relevant fields
     }
 	
 }
