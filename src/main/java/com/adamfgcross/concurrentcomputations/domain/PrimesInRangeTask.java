@@ -1,5 +1,6 @@
 package com.adamfgcross.concurrentcomputations.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.CollectionTable;
@@ -11,8 +12,16 @@ import jakarta.persistence.JoinColumn;
 @Entity
 public class PrimesInRangeTask extends Task {
 	private String rangeMin;
-	private String maxRange;
+	private String rangeMax;
 	
+	public String getRangeMax() {
+		return rangeMax;
+	}
+
+	public void setRangeMax(String rangeMax) {
+		this.rangeMax = rangeMax;
+	}
+
 	@ElementCollection
     @CollectionTable(name = "prime_numbers", joinColumns = @JoinColumn(name = "prime_number_id"))
     @Column(name = "primes")
@@ -24,13 +33,5 @@ public class PrimesInRangeTask extends Task {
 
 	public void setRangeMin(String rangeMin) {
 		this.rangeMin = rangeMin;
-	}
-
-	public String getMaxRange() {
-		return maxRange;
-	}
-
-	public void setMaxRange(String maxRange) {
-		this.maxRange = maxRange;
 	}
 }

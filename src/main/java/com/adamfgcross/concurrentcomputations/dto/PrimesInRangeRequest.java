@@ -3,7 +3,16 @@ package com.adamfgcross.concurrentcomputations.dto;
 public class PrimesInRangeRequest extends TaskRequest {
 
 	private String rangeMin;
+	private String rangeMax;
 	
+	public String getRangeMax() {
+		return rangeMax;
+	}
+
+	public void setRangeMax(String rangeMax) {
+		this.rangeMax = rangeMax;
+	}
+
 	public String getRangeMin() {
 		return rangeMin;
 	}
@@ -12,13 +21,4 @@ public class PrimesInRangeRequest extends TaskRequest {
 		this.rangeMin = rangeMin;
 	}
 
-	public String getMaxRange() {
-		return maxRange;
-	}
-
-	public void setMaxRange(String maxRange) {
-		this.maxRange = maxRange;
-	}
-
-	private String maxRange;
 }
