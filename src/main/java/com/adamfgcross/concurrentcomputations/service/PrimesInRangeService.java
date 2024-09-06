@@ -11,13 +11,18 @@ import com.adamfgcross.concurrentcomputations.domain.User;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
 import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
 
+import helper.PrimesInRangeHelper;
+
 @Service
 public class PrimesInRangeService {
 	
 	private TaskRepository taskRepository;
+	private PrimesInRangeHelper primesInRangeHelper;
 	
-	public PrimesInRangeService(TaskRepository taskRepository) {
+	public PrimesInRangeService(TaskRepository taskRepository,
+			PrimesInRangeHelper primesInRangeHelper) {
 		this.taskRepository = taskRepository;
+		this.primesInRangeHelper = primesInRangeHelper;
 	}
 	
 	public PrimesInRangeTask initiatePrimesInRangeTask(User user, PrimesInRangeRequest primesInRangeRequest) {
@@ -37,7 +42,12 @@ public class PrimesInRangeService {
 	}
 
 	@Async
-	private CompletableFuture<PrimesInRangeTaskContext> computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
-		return null;
+	private CompletableFuture<PrimesInRangeTaskContext> initiateComputation(PrimesInRangeTaskContext primesInRangeTaskContext) {
+		return CompletableFuture.supplyAsync(() -> computePrimesInRange(primesInRangeTaskContext));
 	}
+	
+	private PrimesInRangeTaskContext computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
+		return primesInRangeHelper.computePrimesInRange(primesInRangeTaskContext);
+	}
+	
 }
