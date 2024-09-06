@@ -69,6 +69,16 @@ I'm going to use **JWT** for authentication.
 I'll create some more delicate handling of threads
 to manage the tasks allowed for any one user.
 
+### Do Something More Interesting with Concurrency
+
+A primary goal here is to familiarize myself with
+concurrency and especially how it is done in Java. Right
+now I am using some tools built into Spring to offload
+a computation so it is not performed on the main
+request thread, but that isn't very interesting. I'm
+working on developing some computation that will make
+interesting use of multithreading.
+
 
 ## TODO
 
