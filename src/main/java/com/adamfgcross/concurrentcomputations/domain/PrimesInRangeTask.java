@@ -16,7 +16,7 @@ public class PrimesInRangeTask extends Task {
 	@ElementCollection
     @CollectionTable(name = "prime_numbers", joinColumns = @JoinColumn(name = "prime_number_id"))
     @Column(name = "primes")
-	private Set<String> primes;
+	private Set<String> primes = new HashSet<>();
 	
 	public String getRangeMin() {
 		return rangeMin;
