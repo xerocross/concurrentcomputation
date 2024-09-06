@@ -56,7 +56,7 @@ public class IntFactorTaskController {
             String username = authentication.getName();
             CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
             user = userDetails.getUser();
-        } else if (authentication instanceof AnonymousAuthenticationToken) {
+        } else if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
         	isAnonymous = true;
         	logger.info("anonymous user");
 			user = userService.createAnonymousUser();
