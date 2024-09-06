@@ -4,9 +4,13 @@ import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
+import com.adamfgcross.concurrentcomputations.domain.User;
+import com.adamfgcross.concurrentcomputations.service.TokenGenerator;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,6 +28,9 @@ public class JwtUtil {
 
 	@Value("${spring.secret-key}")
     private String SECRET_KEY;
+	
+	private Long tokenValidityType = 86400000L;
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -72,7 +79,17 @@ public class JwtUtil {
                 .setSubject(authentication.getName()) // The subject is typically the username
                 .claim("roles", authentication.getAuthorities()) // Include roles or other claims
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day expiration
+                .setExpiration(new Date(System.currentTimeMillis() + tokenValidityType)) // 1 day expiration
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+    
+    public String generateAnonymousUserToken(User user) {
+        return Jwts.builder()
+                .setSubject("anonymous")
+                .claim("tempKey", user.getTempKey())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + tokenValidityType)) // 1 day expiration
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.adamfgcross.concurrentcomputations.domain.IntFactorTask;
 import com.adamfgcross.concurrentcomputations.domain.IntFactorTaskContext;
 import com.adamfgcross.concurrentcomputations.domain.Task;
+import com.adamfgcross.concurrentcomputations.domain.User;
 import com.adamfgcross.concurrentcomputations.dto.IntFactorTaskRequest;
 import com.adamfgcross.concurrentcomputations.dto.IntFactorTaskResponse;
 import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
@@ -29,8 +30,9 @@ public class IntFactorService implements TaskService<IntFactorTaskRequest> {
 		this.taskRepository = taskRepository;
 	}
 	
-	public Long submitTask(IntFactorTaskRequest intFactorTaskRequest) {
+	public Long submitTask(User user, IntFactorTaskRequest intFactorTaskRequest) {
 		IntFactorTask intFactorTask = new IntFactorTask();
+		intFactorTask.setUser(user);
 		intFactorTask.setNumber(intFactorTaskRequest.getIntToFactor());
 		taskRepository.save(intFactorTask);
 		beginTask(intFactorTask);

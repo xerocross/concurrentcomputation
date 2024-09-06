@@ -49,7 +49,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Disable session management	
 	        .authorizeHttpRequests((authorize) -> authorize
 	        	.requestMatchers("/auth/login", "/register", "/h2-console/**").permitAll()
-				.anyRequest().hasRole("USER")
+				.anyRequest().hasAnyRole("USER", "ANONYMOUS")
 			)
 			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))

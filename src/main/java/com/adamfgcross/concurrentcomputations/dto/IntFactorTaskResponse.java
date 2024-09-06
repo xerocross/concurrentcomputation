@@ -6,6 +6,16 @@ public class IntFactorTaskResponse extends TaskResponse {
 	private String number;
 	private List<String> factors;
 	
+	private String token;
+	
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
 	public IntFactorTaskResponse() {
 		super();
 	}
