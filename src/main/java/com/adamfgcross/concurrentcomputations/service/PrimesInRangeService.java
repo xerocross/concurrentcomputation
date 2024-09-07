@@ -1,5 +1,6 @@
 package com.adamfgcross.concurrentcomputations.service;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.scheduling.annotation.Async;
@@ -50,4 +51,8 @@ public class PrimesInRangeService {
 		return primesInRangeHelper.computePrimesInRange(primesInRangeTaskContext);
 	}
 	
+	
+	public synchronized void appendComputedPrimesToResult(PrimesInRangeTask primesInRangeTask, List<Long> primes) {
+		primesInRangeTask.getPrimes().addAll(primes.stream().map(p -> p.toString()).toList());
+	}
 }
