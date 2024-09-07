@@ -1,28 +1,24 @@
-package helper;
+package com.adamfgcross.concurrentcomputations.helper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
-import com.adamfgcross.concurrentcomputations.service.PrimesInRangeService;
+import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
 import com.adamfgcross.concurrentcomputations.task.ComputePrimesInRangeCallable;
 
 @Component
 public class PrimesInRangeHelper {
 	
-	private PrimesInRangeService primesInRangeService;
-	
-	public PrimesInRangeHelper(PrimesInRangeService primesInRangeService) {
-		this.primesInRangeService = primesInRangeService;
-	}
+	@Autowired
+	private TaskRepository taskRepository;
 	
 	public PrimesInRangeTaskContext computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
 		int numThreads = 3;
@@ -45,7 +41,7 @@ public class PrimesInRangeHelper {
 				}
 			}, executorService);
 			future.thenAccept(primes -> {
-				primesInRangeService.appendComputedPrimesToResult(primesInRangeTask, primes);
+				appendComputedPrimesToResult(primesInRangeTask, primes);
 			});
 			futures.add(future);
 		});
@@ -74,6 +70,11 @@ public class PrimesInRangeHelper {
 			subranges.add(new SubRange(rangeMin + (numWholeIntervals - 1 )*intervalPerThread, rangeMax));
 		}
 		return subranges;
+	}
+	
+	private synchronized void appendComputedPrimesToResult(PrimesInRangeTask primesInRangeTask, List<String> primes) {
+		primesInRangeTask.getPrimes().addAll(primes);
+		taskRepository.save(primesInRangeTask);
 	}
 }
 

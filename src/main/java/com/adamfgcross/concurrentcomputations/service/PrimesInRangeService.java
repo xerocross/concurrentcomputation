@@ -10,9 +10,8 @@ import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
 import com.adamfgcross.concurrentcomputations.domain.User;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
+import com.adamfgcross.concurrentcomputations.helper.PrimesInRangeHelper;
 import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
-
-import helper.PrimesInRangeHelper;
 
 @Service
 public class PrimesInRangeService {
