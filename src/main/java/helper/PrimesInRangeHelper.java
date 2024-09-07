@@ -30,6 +30,7 @@ public class PrimesInRangeHelper {
 		var subranges = getSubranges(primesInRangeTaskContext);
 		ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 		List<ComputePrimesInRangeCallable> tasks = new ArrayList<>();
+		List<CompletableFuture<List<String>>> futures = new ArrayList<>();
 		subranges.forEach(subrange -> {
 			tasks.add(new ComputePrimesInRangeCallable(subrange.getMin(), subrange.getMax()));
 		});
@@ -46,7 +47,14 @@ public class PrimesInRangeHelper {
 			future.thenAccept(primes -> {
 				primesInRangeService.appendComputedPrimesToResult(primesInRangeTask, primes);
 			});
+			futures.add(future);
 		});
+		CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allDone.join();  // Wait for all tasks
+
+
+        // Shutdown the ExecutorService
+        executorService.shutdown();
 		return primesInRangeTaskContext;
 	}
 	
