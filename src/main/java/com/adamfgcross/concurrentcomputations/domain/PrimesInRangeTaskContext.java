@@ -6,8 +6,17 @@ import java.util.Set;
 public class PrimesInRangeTaskContext {
 	private Long taskId;
 	private String rangeMin;
+	private PrimesInRangeTask primesInRangeTask;
 	public String getRangeMin() {
 		return rangeMin;
+	}
+
+	public PrimesInRangeTask getPrimesInRangeTask() {
+		return primesInRangeTask;
+	}
+
+	public void setPrimesInRangeTask(PrimesInRangeTask primesInRangeTask) {
+		this.primesInRangeTask = primesInRangeTask;
 	}
 
 	public void setRangeMin(String rangeMin) {

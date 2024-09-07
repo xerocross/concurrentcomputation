@@ -52,8 +52,8 @@ public class PrimesInRangeService {
 	}
 	
 	
-	public synchronized void appendComputedPrimesToResult(PrimesInRangeTask primesInRangeTask, List<Long> primes) {
-		primesInRangeTask.getPrimes().addAll(primes.stream().map(p -> p.toString()).toList());
+	public synchronized void appendComputedPrimesToResult(PrimesInRangeTask primesInRangeTask, List<String> primes) {
+		primesInRangeTask.getPrimes().addAll(primes);
 		taskRepository.save(primesInRangeTask);
 	}
 }
