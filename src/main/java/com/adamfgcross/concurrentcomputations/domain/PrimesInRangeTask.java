@@ -27,6 +27,14 @@ public class PrimesInRangeTask extends Task {
     @Column(name = "primes")
 	private Set<String> primes = new HashSet<>();
 	
+	public Set<String> getPrimes() {
+		return primes;
+	}
+
+	public void setPrimes(Set<String> primes) {
+		this.primes = primes;
+	}
+
 	public String getRangeMin() {
 		return rangeMin;
 	}
