@@ -2,26 +2,28 @@ package com.adamfgcross.concurrentcomputations.task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-public class ComputePrimesInRangeRunnable implements Runnable {
+public class ComputePrimesInRangeCallable implements Callable<List<String>> {
 
 	private Long rangeMin;
 	private Long rangeMax;
 	private List<Long> primes = new ArrayList<>();
 	
-	public ComputePrimesInRangeRunnable(Long rangeMin, Long rangeMax) {
+	public ComputePrimesInRangeCallable(Long rangeMin, Long rangeMax) {
 		this.rangeMin = rangeMin;
 		this.rangeMax = rangeMax;
 	}
 	
 	@Override
-	public void run() {
+	public List<String> call() {
 		// TODO Auto-generated method stub
 		for (long i = rangeMin; i < rangeMax; i++) {
 			if (isPrime(i)) {
 				primes.add(i);
 			}
 		}
+		return primes.stream().map(p -> p.toString()).toList();
 	}
 
 	private boolean isPrime(Long number) {
