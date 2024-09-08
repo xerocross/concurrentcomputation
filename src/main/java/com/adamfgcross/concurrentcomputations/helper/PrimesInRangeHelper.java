@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +16,15 @@ import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
 import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
 import com.adamfgcross.concurrentcomputations.task.ComputePrimesInRangeCallable;
 
+import jakarta.transaction.Transactional;
+
 @Component
 public class PrimesInRangeHelper {
 	
 	@Autowired
 	private TaskRepository taskRepository;
+	
+	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeHelper.class);
 	
 	public PrimesInRangeTaskContext computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
 		int numThreads = 3;
@@ -28,6 +34,7 @@ public class PrimesInRangeHelper {
 		List<ComputePrimesInRangeCallable> tasks = new ArrayList<>();
 		List<CompletableFuture<List<String>>> futures = new ArrayList<>();
 		subranges.forEach(subrange -> {
+			logger.info("generating thread for subrange: " + subrange.getMin() + " to " + subrange.getMax());
 			tasks.add(new ComputePrimesInRangeCallable(subrange.getMin(), subrange.getMax()));
 		});
 		
@@ -41,12 +48,19 @@ public class PrimesInRangeHelper {
 				}
 			}, executorService);
 			future.thenAccept(primes -> {
+				logger.info("appending computed primes: " + primes.toString());
 				appendComputedPrimesToResult(primesInRangeTask, primes);
 			});
 			futures.add(future);
 		});
 		CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-        allDone.join();  // Wait for all tasks
+        
+		allDone.thenRun(() -> {
+			markTaskComplete(primesInRangeTask);
+			logger.info("finished computing primes in range");
+		});
+		
+		allDone.join();  // Wait for all tasks
 
 
         // Shutdown the ExecutorService
@@ -67,13 +81,28 @@ public class PrimesInRangeHelper {
 			subranges.add(new SubRange(rangeMin + i*intervalPerThread, rangeMin + (i + 1)*intervalPerThread));
 		}
 		if (remainder > 0L) {
-			subranges.add(new SubRange(rangeMin + (numWholeIntervals - 1 )*intervalPerThread, rangeMax));
+			subranges.add(new SubRange(rangeMin + (numWholeIntervals)*intervalPerThread, rangeMax));
 		}
 		return subranges;
 	}
 	
+	@Transactional
 	private synchronized void appendComputedPrimesToResult(PrimesInRangeTask primesInRangeTask, List<String> primes) {
-		primesInRangeTask.getPrimes().addAll(primes);
+		logger.info("appendComputedPrimesToResult is called");
+		try {
+			var currentPrimes = primesInRangeTask.getPrimes();
+			logger.info("found that primes is currently: " + currentPrimes.toString());
+			currentPrimes.addAll(primes);
+			logger.info("added primes: " + primes.toString());
+			taskRepository.save(primesInRangeTask);
+		} catch (Exception e) {
+			logger.error("encountered an error while saving primes:", e);
+		}
+	}
+	
+	@Transactional
+	private synchronized void markTaskComplete(PrimesInRangeTask primesInRangeTask) {
+		primesInRangeTask.setIsCompleted(true);
 		taskRepository.save(primesInRangeTask);
 	}
 }
