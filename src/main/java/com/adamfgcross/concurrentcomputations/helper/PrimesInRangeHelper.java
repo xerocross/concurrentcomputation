@@ -76,8 +76,8 @@ public class PrimesInRangeHelper {
 	}
 	
 	private List<SubRange> getSubranges(PrimesInRangeTaskContext primesInRangeTaskContext) {
-		Long rangeMin = Long.parseLong(primesInRangeTaskContext.getRangeMin());
-		Long rangeMax = Long.parseLong(primesInRangeTaskContext.getRangeMax());
+		Long rangeMin = primesInRangeTaskContext.getRangeMin();
+		Long rangeMax = primesInRangeTaskContext.getRangeMax();
 		Long range = rangeMax - rangeMin;
 		List<SubRange> subranges = new ArrayList<>();
 		Long intervalPerThread = 1000L;

@@ -11,14 +11,14 @@ import jakarta.persistence.JoinColumn;
 
 @Entity
 public class PrimesInRangeTask extends Task {
-	private String rangeMin;
-	private String rangeMax;
+	private Long rangeMin;
+	private Long rangeMax;
 	
-	public String getRangeMax() {
+	public Long getRangeMax() {
 		return rangeMax;
 	}
 
-	public void setRangeMax(String rangeMax) {
+	public void setRangeMax(Long rangeMax) {
 		this.rangeMax = rangeMax;
 	}
 
@@ -35,11 +35,11 @@ public class PrimesInRangeTask extends Task {
 		this.primes = primes;
 	}
 
-	public String getRangeMin() {
+	public Long getRangeMin() {
 		return rangeMin;
 	}
 
-	public void setRangeMin(String rangeMin) {
+	public void setRangeMin(Long rangeMin) {
 		this.rangeMin = rangeMin;
 	}
 }

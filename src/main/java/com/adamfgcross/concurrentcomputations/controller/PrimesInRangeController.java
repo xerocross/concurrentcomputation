@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,8 @@ import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeResponse;
 import com.adamfgcross.concurrentcomputations.service.PrimesInRangeService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/primes")
 public class PrimesInRangeController {
@@ -28,7 +31,13 @@ public class PrimesInRangeController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<PrimesInRangeResponse> startComputingPrimesInRange(@RequestBody PrimesInRangeRequest primesInRangeRequest) {
+	public ResponseEntity<?> startComputingPrimesInRange(@Valid @RequestBody PrimesInRangeRequest primesInRangeRequest,
+			BindingResult bindingResult) {
+		
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+		
 		PrimesInRangeTask primesInRangeTask =  primesInRangeService.initiatePrimesInRangeTask(null, primesInRangeRequest);
 		var primesInRangeResponse = new PrimesInRangeResponse();
 		primesInRangeResponse.setId(primesInRangeTask.getId());

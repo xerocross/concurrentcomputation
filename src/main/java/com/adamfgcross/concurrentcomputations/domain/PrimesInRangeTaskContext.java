@@ -5,9 +5,10 @@ import java.util.Set;
 
 public class PrimesInRangeTaskContext {
 	private Long taskId;
-	private String rangeMin;
+	private Long rangeMin;
 	private PrimesInRangeTask primesInRangeTask;
-	public String getRangeMin() {
+	
+	public Long getRangeMin() {
 		return rangeMin;
 	}
 
@@ -19,19 +20,19 @@ public class PrimesInRangeTaskContext {
 		this.primesInRangeTask = primesInRangeTask;
 	}
 
-	public void setRangeMin(String rangeMin) {
+	public void setRangeMin(Long rangeMin) {
 		this.rangeMin = rangeMin;
 	}
 
-	public String getRangeMax() {
+	public Long getRangeMax() {
 		return rangeMax;
 	}
 
-	public void setRangeMax(String rangeMax) {
+	public void setRangeMax(Long rangeMax) {
 		this.rangeMax = rangeMax;
 	}
 
-	private String rangeMax;
+	private Long rangeMax;
 
 	public Long getTaskId() {
 		return taskId;
