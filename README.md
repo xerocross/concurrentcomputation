@@ -16,6 +16,8 @@ request thread..
 * Uses **ExecutorService** with fixed thread pool
 to manage **multi-threaded** computation of prime
 numbers.
+* Basic validation of user inputs in place for
+Primes in Range service.
 
 ## Goals
 
