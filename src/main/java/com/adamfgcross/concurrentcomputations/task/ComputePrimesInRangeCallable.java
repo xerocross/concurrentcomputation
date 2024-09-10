@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ComputePrimesInRangeCallable implements Callable<List<String>> {
 
 	private Long rangeMin;
 	private Long rangeMax;
 	private List<Long> primes = new ArrayList<>();
+	private static final Logger logger = LoggerFactory.getLogger(ComputePrimesInRangeCallable.class);
 	
 	public ComputePrimesInRangeCallable(Long rangeMin, Long rangeMax) {
 		this.rangeMin = rangeMin;
@@ -17,8 +21,10 @@ public class ComputePrimesInRangeCallable implements Callable<List<String>> {
 	
 	@Override
 	public List<String> call() {
+		logger.info("computing primes in range " + rangeMin + " to " + rangeMax);
 		// TODO Auto-generated method stub
 		for (long i = rangeMin; i < rangeMax; i++) {
+			logger.info("checking prime " + i);
 			if (isPrime(i)) {
 				primes.add(i);
 			}

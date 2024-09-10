@@ -45,6 +45,7 @@ public class PrimesInRangeHelper {
 					return computationTask.call();
 				} catch (Exception e) {
 					e.printStackTrace();
+					logger.error("task encountered an exception", e);
 					return null;
 				}
 			}, executorService);
@@ -55,23 +56,20 @@ public class PrimesInRangeHelper {
 			futures.add(future);
 		});
 		CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-        
-		allDone.thenRun(() -> {
-			markTaskComplete(primesInRangeTask);
-			logger.info("finished computing primes in range");
-			executorService.shutdown();
-	        try {
-	            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-	                logger.warn("Executor did not terminate in the specified time.");
-	                executorService.shutdownNow();  // Force shutdown if not completed
-	            }
-	        } catch (InterruptedException ex) {
-	            logger.error("Executor termination interrupted.", ex);
-	            executorService.shutdownNow();  // Force shutdown on interruption
-	            Thread.currentThread().interrupt();
-	        }
-		});
 		allDone.join();
+		markTaskComplete(primesInRangeTask);
+		logger.info("finished computing primes in range");
+		executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                logger.warn("Executor did not terminate in the specified time.");
+                executorService.shutdownNow();  // Force shutdown if not completed
+            }
+        } catch (InterruptedException ex) {
+            logger.error("Executor termination interrupted.", ex);
+            executorService.shutdownNow();  // Force shutdown on interruption
+            Thread.currentThread().interrupt();
+        }
 		return primesInRangeTaskContext;
 	}
 	
