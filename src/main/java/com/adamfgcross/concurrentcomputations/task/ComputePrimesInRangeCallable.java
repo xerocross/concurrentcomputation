@@ -24,7 +24,6 @@ public class ComputePrimesInRangeCallable implements Callable<List<String>> {
 		logger.info("computing primes in range " + rangeMin + " to " + rangeMax);
 		// TODO Auto-generated method stub
 		for (long i = rangeMin; i < rangeMax; i++) {
-			logger.info("checking prime " + i);
 			if (isPrime(i)) {
 				primes.add(i);
 			}
