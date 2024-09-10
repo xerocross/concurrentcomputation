@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,13 +59,19 @@ public class PrimesInRangeHelper {
 		allDone.thenRun(() -> {
 			markTaskComplete(primesInRangeTask);
 			logger.info("finished computing primes in range");
+			executorService.shutdown();
+	        try {
+	            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+	                logger.warn("Executor did not terminate in the specified time.");
+	                executorService.shutdownNow();  // Force shutdown if not completed
+	            }
+	        } catch (InterruptedException ex) {
+	            logger.error("Executor termination interrupted.", ex);
+	            executorService.shutdownNow();  // Force shutdown on interruption
+	            Thread.currentThread().interrupt();
+	        }
 		});
-		
-		allDone.join();  // Wait for all tasks
-
-
-        // Shutdown the ExecutorService
-        executorService.shutdown();
+		allDone.join();
 		return primesInRangeTaskContext;
 	}
 	
