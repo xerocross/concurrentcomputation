@@ -1,5 +1,10 @@
 package com.adamfgcross.concurrentcomputations.domain;
 
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,7 +23,19 @@ public class Task {
 	private Long id;
 	
 	private Boolean isCompleted;
+
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private Instant createdAt;
 	
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Instant createdAt) {
+		this.createdAt = createdAt;
+	}
+
 	public Boolean getIsCompleted() {
 		return isCompleted;
 	}
