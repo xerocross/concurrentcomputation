@@ -1,6 +1,10 @@
 spring:
   profiles: 
     active: dev
+  rate-limit:
+	anonymous:
+	  capacity: 5
+	  refill-rate: 1
   logging:
     level:
       root: DEBUG
