@@ -3,8 +3,8 @@ spring:
     active: dev
   rate-limit:
     anonymous:
-      capacity: 5
-      refill-rate: 1
+      CAPACITY: 5
+      REFILL_RATE: 1
   logging:
     level:
       root: DEBUG

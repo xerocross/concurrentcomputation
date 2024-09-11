@@ -24,10 +24,10 @@ public class RateLimitFilter implements Filter {
 
 	private final Map<String, Bucket> ipTokenBuckets = new ConcurrentHashMap<>();
 	
-	@Value("${spring.rate-limit.anonymous.capacity}")
+	@Value("${spring.rate-limit.anonymous.CAPACITY}")
 	private int CAPACITY;
 	
-	@Value("${spring.rate-limit.anonymous.refill-rate}")
+	@Value("${spring.rate-limit.anonymous.REFILL_RATE}")
 	private int REFILL_RATE;
 
     @Override
