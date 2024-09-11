@@ -22,7 +22,6 @@ public class ComputePrimesInRangeCallable implements Callable<List<String>> {
 	@Override
 	public List<String> call() {
 		logger.info("computing primes in range " + rangeMin + " to " + rangeMax);
-		// TODO Auto-generated method stub
 		for (long i = rangeMin; i < rangeMax; i++) {
 			if (isPrime(i)) {
 				primes.add(i);
@@ -39,11 +38,11 @@ public class ComputePrimesInRangeCallable implements Callable<List<String>> {
         // Check divisibility up to the square root of the number
         for (long i = 2; i * i <= number; i++) {
             if (number % i == 0) {
-                return false;  // Not prime if divisible by i
+                return false;
             }
         }
 
-        return true;  // Prime if no divisors found
+        return true;
 	}
 	
 }
