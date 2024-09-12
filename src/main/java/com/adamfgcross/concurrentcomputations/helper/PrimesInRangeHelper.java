@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
 import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
+import com.adamfgcross.concurrentcomputations.service.TaskStoreService;
 import com.adamfgcross.concurrentcomputations.task.ComputePrimesInRangeCallable;
 
 import jakarta.transaction.Transactional;
@@ -24,6 +25,9 @@ public class PrimesInRangeHelper {
 	
 	@Autowired
 	private TaskRepository taskRepository;
+	
+	@Autowired
+	private TaskStoreService taskStoreService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeHelper.class);
 	
@@ -54,6 +58,9 @@ public class PrimesInRangeHelper {
 				appendComputedPrimesToResult(primesInRangeTask, primes);
 			});
 			futures.add(future);
+		});
+		futures.forEach(future -> {
+			taskStoreService.storeTaskFuture(primesInRangeTask.getId(), future);
 		});
 		CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 		allDone.join();
