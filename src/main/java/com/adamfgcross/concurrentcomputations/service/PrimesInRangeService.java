@@ -2,7 +2,9 @@ package com.adamfgcross.concurrentcomputations.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
 import com.adamfgcross.concurrentcomputations.domain.Task;
+import com.adamfgcross.concurrentcomputations.domain.TaskStatus;
 import com.adamfgcross.concurrentcomputations.domain.User;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeResponse;
@@ -23,12 +26,16 @@ public class PrimesInRangeService {
 	
 	private TaskRepository taskRepository;
 	private PrimesInRangeHelper primesInRangeHelper;
+	private TaskStoreService taskStoreService;
+	
 	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeService.class);
 	
 	public PrimesInRangeService(TaskRepository taskRepository,
-			PrimesInRangeHelper primesInRangeHelper) {
+			PrimesInRangeHelper primesInRangeHelper,
+			TaskStoreService taskStoreService) {
 		this.taskRepository = taskRepository;
 		this.primesInRangeHelper = primesInRangeHelper;
+		this.taskStoreService = taskStoreService;
 	}
 	
 	public Optional<PrimesInRangeResponse> getTask(Long id) {
@@ -43,6 +50,22 @@ public class PrimesInRangeService {
 		} else {
 			return Optional.empty();
 		}
+	}
+	
+	public Optional<PrimesInRangeResponse> cancelTask(Long id) {
+		Optional<Task> taskOptional = taskRepository.findById(id);
+		taskOptional.ifPresent(task -> {
+			if (task instanceof PrimesInRangeTask) {
+				taskStoreService.getTaskFutures(task.getId())
+				.ifPresent(futures -> {
+					futures.forEach(f -> {
+						f.cancel(true);
+					});
+				});
+				task.setTaskStatus(TaskStatus.CANCELLED);
+			}
+		});
+		return taskOptional.map(t -> (PrimesInRangeTask) t).map(this::getTaskResponse);
 	}
 	
 	private PrimesInRangeResponse getTaskResponse(PrimesInRangeTask primesInRangeTask) {

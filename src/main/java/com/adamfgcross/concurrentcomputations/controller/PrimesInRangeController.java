@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +17,7 @@ import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeResponse;
 import com.adamfgcross.concurrentcomputations.service.PrimesInRangeService;
+import com.adamfgcross.concurrentcomputations.service.TaskNotFoundException;
 
 import jakarta.validation.Valid;
 
@@ -49,4 +52,10 @@ public class PrimesInRangeController {
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 	
+	@PatchMapping("/{id}")
+	public ResponseEntity<?> cancelTask(@PathVariable Long id) {
+		var response = primesInRangeService.cancelTask(id);
+		return response.map(t -> ResponseEntity.ok(t))
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
 }
