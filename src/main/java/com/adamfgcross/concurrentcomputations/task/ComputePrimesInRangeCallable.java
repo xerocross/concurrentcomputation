@@ -26,6 +26,10 @@ public class ComputePrimesInRangeCallable implements Callable<List<String>> {
 			if (isPrime(i)) {
 				primes.add(i);
 			}
+			if (Thread.currentThread().isInterrupted()) {
+                System.out.println("Task was interrupted!");
+                break;
+            }
 		}
 		return primes.stream().map(p -> p.toString()).toList();
 	}
