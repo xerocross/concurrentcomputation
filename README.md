@@ -12,12 +12,14 @@ in progress started Sept 3, 2024.
 large integers using Java's **BigInteger**.
 * Uses **Spring's** support for **asynchronous**
 computation to perform computation off the main
-request thread..
+request thread.
 * Uses **ExecutorService** with fixed thread pool
 to manage **multi-threaded** computation of prime
 numbers.
 * Basic validation of user inputs in place for
 Primes in Range service.
+* Allows **anonymous requests**, but puts **rate limits**
+on them.
 
 ## Goals
 
@@ -117,6 +119,13 @@ others and the user queries at exactly the right
 time. The user would know from the `isCompleted`
 flag whether computation is still in progress.
 
+I am currently building the logic and structure
+to allow users to cancel/interrupt tasks in motion. This
+will be initiated using a PATCH request from the
+user, which will then attempt to interrupt all
+associated running threads and cancel any that
+are queued.
+
 ### To Do
 
 Some basic elements and improvements are still
@@ -126,7 +135,6 @@ in progress here, as follows:
 * Reasonable restrictions on usage;
 * Validation of input values;
 * Testing
-* Create a way to cancel a running task;
 
 
 ## Current To-Do Items In Progress
