@@ -3,7 +3,7 @@ package com.adamfgcross.concurrentcomputations.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PrimesInRangeTaskContext {
+public class PrimesInRangeTaskContext extends TaskContext {
 	private Long taskId;
 	private Long rangeMin;
 	private PrimesInRangeTask primesInRangeTask;
