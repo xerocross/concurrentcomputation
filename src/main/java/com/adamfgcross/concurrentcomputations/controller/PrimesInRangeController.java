@@ -17,7 +17,6 @@ import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeResponse;
 import com.adamfgcross.concurrentcomputations.service.PrimesInRangeService;
-import com.adamfgcross.concurrentcomputations.service.TaskNotFoundException;
 
 import jakarta.validation.Valid;
 
