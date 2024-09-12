@@ -56,12 +56,14 @@ public class PrimesInRangeService {
 		Optional<Task> taskOptional = taskRepository.findById(id);
 		taskOptional.ifPresent(task -> {
 			if (task instanceof PrimesInRangeTask) {
+				logger.info("cancelling task:");
 				taskStoreService.getTaskFutures(task.getId())
 				.ifPresent(futures -> {
 					futures.forEach(f -> {
 						f.cancel(true);
 					});
 				});
+				taskStoreService.removeTaskFutures(task.getId());
 				task.setTaskStatus(TaskStatus.CANCELLED);
 			}
 		});

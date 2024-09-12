@@ -31,4 +31,8 @@ public class TaskStoreService {
 			return futures;
 		});
 	}
+	
+	public void removeTaskFutures(Long taskId) {
+		taskFutureMap.remove(taskId);
+	}
 }
