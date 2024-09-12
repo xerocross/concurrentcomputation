@@ -45,14 +45,14 @@ public class PrimesInRangeController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<PrimesInRangeResponse> getPrimesInRangeResult(@PathVariable Long id) {
+	public ResponseEntity<PrimesInRangeResponse> getPrimesInRangeResult(@PathVariable("id") Long id) {
 		return primesInRangeService.getTask(id)
 				.map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 	
 	@PatchMapping("/{id}")
-	public ResponseEntity<?> cancelTask(@PathVariable Long id) {
+	public ResponseEntity<?> cancelTask(@PathVariable("id") Long id) {
 		var response = primesInRangeService.cancelTask(id);
 		return response.map(t -> ResponseEntity.ok(t))
 				.orElseGet(() -> ResponseEntity.notFound().build());
