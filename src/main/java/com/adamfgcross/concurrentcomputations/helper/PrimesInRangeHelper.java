@@ -77,6 +77,7 @@ public class PrimesInRangeHelper {
             executorService.shutdownNow();  // Force shutdown on interruption
             Thread.currentThread().interrupt();
         }
+        taskStoreService.removeTaskFutures(primesInRangeTask.getId());
 		return primesInRangeTaskContext;
 	}
 	
