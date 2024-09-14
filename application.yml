@@ -5,6 +5,9 @@ spring:
     anonymous:
       CAPACITY: 5
       REFILL_RATE: 1
+    global:
+      CAPACITY: 1000
+      REFILL_RATE: 20
   logging:
     level:
       root: DEBUG

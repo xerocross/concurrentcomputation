@@ -24,15 +24,23 @@ public class RateLimitFilter implements Filter {
 
 	private final Map<String, Bucket> ipTokenBuckets = new ConcurrentHashMap<>();
 	
+	private Bucket globalBucket;
+	
 	@Value("${spring.rate-limit.anonymous.CAPACITY}")
 	private int CAPACITY;
 	
 	@Value("${spring.rate-limit.anonymous.REFILL_RATE}")
 	private int REFILL_RATE;
+	
+	@Value("${spring.rate-limit.global.CAPACITY}")
+	private int GLOBAL_CAPACITY;
+	
+	@Value("${spring.rate-limit.global.REFILL_RATE}")
+	private int GLOBAL_REFILL_RATE;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // Initialization if needed
+    	setUpGlobalBucket();
     }
 
     @Override
@@ -45,11 +53,10 @@ public class RateLimitFilter implements Filter {
         String ip = httpRequest.getRemoteAddr();  // Get client IP address
         Bucket bucket = resolveBucket(ip);
 
-        if (bucket.tryConsume(1)) {
+        if (bucket.tryConsume(1) && globalBucket.tryConsume(1)) {
             // Proceed with the request if the token is available
             chain.doFilter(request, response);
         } else {
-            // If the request is rate-limited, return 429 (Too Many Requests)
             httpResponse.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "too many requests; try again later.");
         }
     }
@@ -67,5 +74,11 @@ public class RateLimitFilter implements Filter {
     	return Bucket.builder()
     	.addLimit(limit -> limit.capacity(CAPACITY).refillGreedy(REFILL_RATE, Duration.ofMinutes(1)))
     	.build();
+    }
+    
+    private void setUpGlobalBucket() {
+    	globalBucket = Bucket.builder()
+	    	.addLimit(limit -> limit.capacity(GLOBAL_CAPACITY).refillGreedy(GLOBAL_REFILL_RATE, Duration.ofMinutes(1)))
+	    	.build();
     }
 }
