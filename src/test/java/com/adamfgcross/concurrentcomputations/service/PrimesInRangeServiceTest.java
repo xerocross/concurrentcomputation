@@ -3,6 +3,7 @@ package com.adamfgcross.concurrentcomputations.service;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,46 @@ public class PrimesInRangeServiceTest {
 		var primesInRangeTask = captor.getValue();
 		assertEquals(primesInRangeTask.getRangeMax(), 10L);
 		assertEquals(primesInRangeTask.getRangeMin(), 1L);
+		
 	}
 	
+	@Test
+	public void getTask_ifPrimesInRangeTaskExists_returnsPrimesInRangeResponseDTOInOptional() {
+		Long testTaskId = 10L;
+		var task = getTestPrimesInRangeTask();
+		task.setRangeMax(10L);
+		task.setRangeMin(1L);
+		when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(task));
+		var result = primesInRangeService.getTask(testTaskId);
+		var taskDTO = result.get();
+		assertEquals("10", taskDTO.getRangeMax());
+		assertEquals("1", taskDTO.getRangeMin());
+	}
+	
+	@Test
+	public void getTask_ifTaskCompleted_responseIndicatesCompleted() {
+		Long testTaskId = 10L;
+		var task = getTestPrimesInRangeTask();
+		task.setIsCompleted(true);
+		when(taskRepository.findById(testTaskId)).thenReturn(Optional.of(task));
+		var result = primesInRangeService.getTask(testTaskId);
+		var taskDTO = result.get();
+		assertEquals(true, taskDTO.getIsCompleted());
+	}
+	
+	@Test
+	public void getTask_ifPrimesInRangeTaskDoesNotExist_returnsEmptyOptional() {
+		Long testTaskId = 10L;
+		when(taskRepository.findById(testTaskId)).thenReturn(Optional.empty());
+		var result = primesInRangeService.getTask(testTaskId);
+		assertTrue(result.isEmpty());
+	}
+	
+	private PrimesInRangeTask getTestPrimesInRangeTask() {
+		var task = new PrimesInRangeTask();
+		task.setId(10L);
+		task.setRangeMin(1L);
+		task.setRangeMax(10L);
+		return task;
+	}
 }
