@@ -3,13 +3,16 @@ package com.adamfgcross.concurrentcomputations.helper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
@@ -29,43 +32,34 @@ public class PrimesInRangeHelper {
 	@Autowired
 	private TaskStoreService taskStoreService;
 	
+	@Value("${spring.concurrency.primes-in-range.num-threads}")
+	private int numThreads;
+	
 	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeHelper.class);
 	
-	public PrimesInRangeTaskContext computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
-		int numThreads = 3;
-		PrimesInRangeTask primesInRangeTask = primesInRangeTaskContext.getPrimesInRangeTask();
+	public void computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
+		var primesInRangeTask = primesInRangeTaskContext.getPrimesInRangeTask();
 		var subranges = getSubranges(primesInRangeTaskContext);
 		ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
-		List<ComputePrimesInRangeCallable> tasks = new ArrayList<>();
-		List<CompletableFuture<List<String>>> futures = new ArrayList<>();
-		subranges.forEach(subrange -> {
-			logger.info("generating thread for subrange: " + subrange.getMin() + " to " + subrange.getMax());
-			tasks.add(new ComputePrimesInRangeCallable(subrange.getMin(), subrange.getMax()));
-		});
+		var tasks = generateTasksForSubranges(subranges);
+		var futures = scheduleTasks(executorService, tasks);
+		storeFutures(primesInRangeTask.getId(), futures);
 		
-		tasks.forEach(computationTask -> {
-			CompletableFuture<List<String>> future = CompletableFuture.supplyAsync(() -> {
-				try {
-					return computationTask.call();
-				} catch (Exception e) {
-					e.printStackTrace();
-					logger.error("task encountered an exception", e);
-					return null;
-				}
-			}, executorService);
+		futures.forEach(future -> {
 			future.thenAccept(primes -> {
 				logger.info("appending computed primes: " + primes.toString());
 				appendComputedPrimesToResult(primesInRangeTask, primes);
 			});
-			futures.add(future);
-		});
-		futures.forEach(future -> {
-			taskStoreService.storeTaskFuture(primesInRangeTask.getId(), future);
 		});
 		CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 		allDone.join();
 		markTaskComplete(primesInRangeTask);
 		logger.info("finished computing primes in range");
+		shutdownExecutor(executorService);
+        taskStoreService.removeTaskFutures(primesInRangeTask.getId());
+	}
+	
+	private void shutdownExecutor(ExecutorService executorService) {
 		executorService.shutdown();
         try {
             if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
@@ -77,10 +71,7 @@ public class PrimesInRangeHelper {
             executorService.shutdownNow();  // Force shutdown on interruption
             Thread.currentThread().interrupt();
         }
-        taskStoreService.removeTaskFutures(primesInRangeTask.getId());
-		return primesInRangeTaskContext;
 	}
-	
 	private List<SubRange> getSubranges(PrimesInRangeTaskContext primesInRangeTaskContext) {
 		Long rangeMin = primesInRangeTaskContext.getRangeMin();
 		Long rangeMax = primesInRangeTaskContext.getRangeMax();
@@ -97,6 +88,38 @@ public class PrimesInRangeHelper {
 			subranges.add(new SubRange(rangeMin + (numWholeIntervals)*intervalPerThread, rangeMax));
 		}
 		return subranges;
+	}
+	
+	private void storeFutures(Long taskId, List<CompletableFuture<List<String>>> futures) {
+		futures.forEach(future -> {
+			taskStoreService.storeTaskFuture(taskId, future);
+		});
+	}
+	
+	private List<ComputePrimesInRangeCallable> generateTasksForSubranges(List<SubRange> subranges) {
+		List<ComputePrimesInRangeCallable> tasks = new ArrayList<>();
+		subranges.forEach(subrange -> {
+			logger.info("generating thread for subrange: " + subrange.getMin() + " to " + subrange.getMax());
+			tasks.add(new ComputePrimesInRangeCallable(subrange.getMin(), subrange.getMax()));
+		});
+		return tasks;
+	}
+	
+	private List<CompletableFuture<List<String>>> scheduleTasks(Executor executor, List<ComputePrimesInRangeCallable> tasks) {
+		List<CompletableFuture<List<String>>> futures = new ArrayList<>();
+		tasks.forEach(computationTask -> {
+			CompletableFuture<List<String>> future = CompletableFuture.supplyAsync(() -> {
+				try {
+					return computationTask.call();
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error("task encountered an exception", e);
+					return null;
+				}
+			}, executor);
+			futures.add(future);
+		});
+		return futures;
 	}
 	
 	@Transactional

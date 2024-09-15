@@ -105,13 +105,13 @@ public class PrimesInRangeService {
 		taskRepository.save(task);
 	}
 	
-	private CompletableFuture<PrimesInRangeTaskContext> initiateComputation(PrimesInRangeTaskContext primesInRangeTaskContext) {
+	private CompletableFuture<Void> initiateComputation(PrimesInRangeTaskContext primesInRangeTaskContext) {
 		logger.info("initiate computation");
-		return CompletableFuture.supplyAsync(() -> computePrimesInRange(primesInRangeTaskContext), executor);
+		return CompletableFuture.runAsync(() -> computePrimesInRange(primesInRangeTaskContext), executor);
 	}
 	
-	private PrimesInRangeTaskContext computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
-		return primesInRangeHelper.computePrimesInRange(primesInRangeTaskContext);
+	private void computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
+		primesInRangeHelper.computePrimesInRange(primesInRangeTaskContext);
 	}
 	
 	

@@ -1,6 +1,9 @@
 spring:
   profiles: 
     active: dev
+  concurrency:
+    primes-in-range:
+      num-threads: 3
   rate-limit:
     anonymous:
       CAPACITY: 5
