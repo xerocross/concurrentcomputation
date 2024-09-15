@@ -2,9 +2,8 @@ package com.adamfgcross.concurrentcomputations.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +27,18 @@ public class PrimesInRangeService {
 	private PrimesInRangeHelper primesInRangeHelper;
 	private TaskStoreService taskStoreService;
 	
+	private final Executor executor;
+	
 	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeService.class);
 	
 	public PrimesInRangeService(TaskRepository taskRepository,
 			PrimesInRangeHelper primesInRangeHelper,
-			TaskStoreService taskStoreService) {
+			TaskStoreService taskStoreService,
+			Executor executor) {
 		this.taskRepository = taskRepository;
 		this.primesInRangeHelper = primesInRangeHelper;
 		this.taskStoreService = taskStoreService;
+		this.executor = executor;
 	}
 	
 	public Optional<PrimesInRangeResponse> getTask(Long id) {
@@ -102,9 +105,9 @@ public class PrimesInRangeService {
 		taskRepository.save(task);
 	}
 	
-	@Async
 	private CompletableFuture<PrimesInRangeTaskContext> initiateComputation(PrimesInRangeTaskContext primesInRangeTaskContext) {
-		return CompletableFuture.supplyAsync(() -> computePrimesInRange(primesInRangeTaskContext));
+		logger.info("initiate computation");
+		return CompletableFuture.supplyAsync(() -> computePrimesInRange(primesInRangeTaskContext), executor);
 	}
 	
 	private PrimesInRangeTaskContext computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
