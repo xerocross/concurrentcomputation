@@ -6,7 +6,7 @@ spring:
       num-threads: 3
     default:
       num-threads: 3
-	  max-thread-time-milliseconds: 2500
+      max-thread-time-milliseconds: 2500
   rate-limit:
     anonymous:
       CAPACITY: 5
