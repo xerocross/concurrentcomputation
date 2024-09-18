@@ -7,7 +7,7 @@ import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
@@ -25,19 +25,22 @@ public class PrimesInRangeService {
 	
 	private TaskRepository taskRepository;
 	private PrimesInRangeHelper primesInRangeHelper;
-	private TaskStoreService taskStoreService;
+	private TaskStoreService<List<String>> primesInRangeTaskStoreService;
 	
 	private final Executor executor;
+	
+	@Autowired
+	private TaskStoreService<Void> dbUpdateTaskStoreService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeService.class);
 	
 	public PrimesInRangeService(TaskRepository taskRepository,
 			PrimesInRangeHelper primesInRangeHelper,
-			TaskStoreService taskStoreService,
+			TaskStoreService<List<String>> taskStoreService,
 			Executor executor) {
 		this.taskRepository = taskRepository;
 		this.primesInRangeHelper = primesInRangeHelper;
-		this.taskStoreService = taskStoreService;
+		this.primesInRangeTaskStoreService = taskStoreService;
 		this.executor = executor;
 	}
 	
@@ -60,13 +63,14 @@ public class PrimesInRangeService {
 		taskOptional.ifPresent(task -> {
 			if (task instanceof PrimesInRangeTask) {
 				logger.info("cancelling task:");
-				taskStoreService.getTaskFutures(task.getId())
+				primesInRangeTaskStoreService.getTaskFutures(task.getId())
 				.ifPresent(futures -> {
 					futures.forEach(f -> {
 						f.cancel(true);
 					});
 				});
-				taskStoreService.removeTaskFutures(task.getId());
+				primesInRangeTaskStoreService.removeTaskFutures(task.getId());
+				dbUpdateTaskStoreService.removeTaskFutures(task.getId());
 				task.setTaskStatus(TaskStatus.CANCELLED);
 			}
 		});
