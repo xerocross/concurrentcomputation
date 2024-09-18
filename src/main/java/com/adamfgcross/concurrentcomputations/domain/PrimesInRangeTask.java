@@ -14,6 +14,13 @@ public class PrimesInRangeTask extends Task {
 	private Long rangeMin;
 	private Long rangeMax;
 	
+	public PrimesInRangeTask() {}
+	
+	public PrimesInRangeTask(Long rangeMin, Long rangeMax) {
+		this.rangeMin = rangeMin;
+		this.rangeMax = rangeMax;
+	}
+	
 	public Long getRangeMax() {
 		return rangeMax;
 	}
