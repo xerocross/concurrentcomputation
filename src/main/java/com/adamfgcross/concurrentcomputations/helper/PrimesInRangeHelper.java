@@ -98,6 +98,7 @@ public class PrimesInRangeHelper {
 		shutdownExecutor(executorService);
 		dbExecutorService.shutdown();
 		primesInRangeTaskStoreService.removeTaskFutures(primesInRangeTask.getId());
+		dbUpdateTaskStoreService.removeTaskFutures(primesInRangeTask.getId());
 	}
 	
 	private void shutdownExecutor(ExecutorService executorService) {
@@ -130,12 +131,6 @@ public class PrimesInRangeHelper {
 			subranges.add(new SubRange(rangeMin + (numWholeIntervals)*intervalPerThread, rangeMax));
 		}
 		return subranges;
-	}
-	
-	private void storeFutures(Long taskId, List<CompletableFuture<?>> futures) {
-		futures.forEach(future -> {
-			taskStoreService.storeTaskFuture(taskId, future);
-		});
 	}
 	
 	private List<ComputePrimesInRangeCallable> generateTasksForSubranges(List<SubRange> subranges) {
