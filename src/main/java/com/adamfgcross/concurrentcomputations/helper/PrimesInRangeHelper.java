@@ -29,7 +29,7 @@ import jakarta.transaction.Transactional;
 @Component
 public class PrimesInRangeHelper {
 	
-	@Value("${spring.concurrency.max-thread-time-milliseconds}")
+	@Value("${spring.concurrency.default.max-thread-time-milliseconds}")
 	private Long MAX_THREAD_TIME_IN_MILLISECONDS;
 	
 	@Autowired
