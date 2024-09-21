@@ -10,8 +10,8 @@ spring:
       max-thread-time-milliseconds: 2500
   rate-limit:
     anonymous:
-      CAPACITY: 5
-      REFILL_RATE: 1
+      CAPACITY: 10
+      REFILL_RATE: 4
     global:
       CAPACITY: 1000
       REFILL_RATE: 20
