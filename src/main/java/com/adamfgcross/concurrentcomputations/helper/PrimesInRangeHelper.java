@@ -56,20 +56,11 @@ public class PrimesInRangeHelper {
 		var tasks = generateTasksForSubranges(subranges);
 		var computationFutures = scheduleTasks(executorService, tasks);
 		primesInRangeTaskStoreService.storeTaskFutures(primesInRangeTask.getId(), computationFutures);
+		var dbUpdateFutures = scheduleAppendingComputedPrimes(primesInRangeTask, computationFutures, dbExecutorService);
+		dbUpdateTaskStoreService.storeTaskFutures(primesInRangeTask.getId(), dbUpdateFutures);
 		
-		
-		var dbUpdateFutures = new ArrayList<CompletableFuture<Void>>();
-		
-		// schedule database updates
-		computationFutures.forEach(future -> {
-			CompletableFuture<Void> dbUpdateFuture = future.thenAcceptAsync(primes -> {
-				logger.info("appending computed primes: " + primes.toString());
-				appendComputedPrimesToResult(primesInRangeTask, primes);
-				return;
-			}, dbExecutorService);
-			dbUpdateFutures.add(dbUpdateFuture);
-		});
 		List<CompletableFuture<?>> incompleteComputationFutures = new ArrayList<>();
+		
 		computationFutures.forEach(f -> {
 			try {
 				f.get(MAX_THREAD_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -87,7 +78,7 @@ public class PrimesInRangeHelper {
 				incompleteComputationFutures.add(f);
 			}
 		});
-		dbUpdateTaskStoreService.storeTaskFutures(primesInRangeTask.getId(), dbUpdateFutures);
+		
 		dbUpdateFutures.forEach(f -> {
 			f.join();
 		});
@@ -99,6 +90,21 @@ public class PrimesInRangeHelper {
 		dbExecutorService.shutdown();
 		primesInRangeTaskStoreService.removeTaskFutures(primesInRangeTask.getId());
 		dbUpdateTaskStoreService.removeTaskFutures(primesInRangeTask.getId());
+	}
+	
+	private List<CompletableFuture<Void>> scheduleAppendingComputedPrimes(PrimesInRangeTask primesInRangeTask, List<CompletableFuture<List<String>>> computationFutures, ExecutorService dbExecutorService) {
+		var dbUpdateFutures = new ArrayList<CompletableFuture<Void>>();
+		
+		// schedule database updates
+		computationFutures.forEach(future -> {
+			CompletableFuture<Void> dbUpdateFuture = future.thenAcceptAsync(primes -> {
+				logger.info("appending computed primes: " + primes.toString());
+				appendComputedPrimesToResult(primesInRangeTask, primes);
+				return;
+			}, dbExecutorService);
+			dbUpdateFutures.add(dbUpdateFuture);
+		});
+		return dbUpdateFutures;
 	}
 	
 	private void shutdownExecutor(ExecutorService executorService) {
