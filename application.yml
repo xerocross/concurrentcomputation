@@ -4,6 +4,7 @@ spring:
   concurrency:
     primes-in-range:
       num-threads: 3
+      interval-per-thread: 1000
     default:
       num-threads: 3
       max-thread-time-milliseconds: 2500

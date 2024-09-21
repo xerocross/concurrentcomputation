@@ -32,6 +32,9 @@ public class PrimesInRangeHelper {
 	@Value("${spring.concurrency.default.max-thread-time-milliseconds}")
 	private Long MAX_THREAD_TIME_IN_MILLISECONDS;
 	
+	@Value("${spring.concurrency.primes-in-range.interval-per-thread}")
+	private Long INTERVAL_PER_THREAD;
+	
 	@Autowired
 	private TaskRepository taskRepository;
 	
@@ -54,8 +57,14 @@ public class PrimesInRangeHelper {
 		// create a separate executor for database updates
 		ExecutorService dbExecutorService = Executors.newFixedThreadPool(1);
 		var tasks = generateTasksForSubranges(subranges);
-		var computationFutures = scheduleTasks(executorService, tasks);
-		primesInRangeTaskStoreService.storeTaskFutures(primesInRangeTask.getId(), computationFutures);
+		List<CompletableFuture<List<String>>> computationFutures;
+		// we synchronize scheduling the tasks and creating and storing their futures
+		// to avoid a possible race condition if user attempts to cancel, which is
+		// also synchronized on this object
+		synchronized (this) {
+			computationFutures = scheduleTasks(executorService, tasks);
+			primesInRangeTaskStoreService.storeTaskFutures(primesInRangeTask.getId(), computationFutures);
+		}
 		var dbUpdateFutures = scheduleAppendingComputedPrimes(primesInRangeTask, computationFutures, dbExecutorService);
 		dbUpdateTaskStoreService.storeTaskFutures(primesInRangeTask.getId(), dbUpdateFutures);
 		
@@ -66,15 +75,22 @@ public class PrimesInRangeHelper {
 				f.get(MAX_THREAD_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
 			} catch (TimeoutException e) {
 			    logger.info("thread timeout occurred");
-			    markTaskStatusError(primesInRangeTask);
+			    CompletableFuture.runAsync(() -> {
+			    	markTaskStatusError(primesInRangeTask);
+			    }, dbExecutorService);
 			    incompleteComputationFutures.add(f);
 			} catch (InterruptedException | ExecutionException e) {
-				markTaskStatusError(primesInRangeTask);
+				CompletableFuture.runAsync(() -> {
+			    	markTaskStatusError(primesInRangeTask);
+			    }, dbExecutorService);
 				e.printStackTrace();
 				logger.error("An exception occurred in domain computation thread.", e);
 				incompleteComputationFutures.add(f);
 			} catch (CancellationException e) {
 				logger.info("thread was cancelled");
+				CompletableFuture.runAsync(() -> {
+			    	markTaskStatusCancelled(primesInRangeTask);
+			    }, dbExecutorService);
 				incompleteComputationFutures.add(f);
 			}
 		});
@@ -83,7 +99,9 @@ public class PrimesInRangeHelper {
 			f.join();
 		});
 		if (incompleteComputationFutures.isEmpty()) {
-			markTaskComplete(primesInRangeTask);
+			CompletableFuture.runAsync(() -> {
+				markTaskComplete(primesInRangeTask);
+		    }, dbExecutorService);
 		}
 		logger.info("finished computing primes in range");
 		shutdownExecutor(executorService);
@@ -107,6 +125,20 @@ public class PrimesInRangeHelper {
 		return dbUpdateFutures;
 	}
 	
+	public synchronized void cancelTask(PrimesInRangeTask primesInRangeTask) {
+		logger.info("cancelling task:");
+		primesInRangeTaskStoreService.getTaskFutures(primesInRangeTask.getId())
+		.ifPresent(futures -> {
+			logger.info("cancelling future");
+			futures.forEach(f -> {
+				f.cancel(true);
+			});
+		});
+		primesInRangeTaskStoreService.removeTaskFutures(primesInRangeTask.getId());
+		dbUpdateTaskStoreService.removeTaskFutures(primesInRangeTask.getId());
+		primesInRangeTask.setTaskStatus(TaskStatus.CANCELLED); // to do: put this on a different thread and save
+	}
+	
 	private void shutdownExecutor(ExecutorService executorService) {
 		executorService.shutdown();
         try {
@@ -126,15 +158,14 @@ public class PrimesInRangeHelper {
 		Long rangeMax = primesInRangeTaskContext.getRangeMax();
 		Long range = rangeMax - rangeMin;
 		List<SubRange> subranges = new ArrayList<>();
-		Long intervalPerThread = 1000L;
-		Long numWholeIntervals = range / intervalPerThread;
-		Long remainder = range % intervalPerThread;
+		Long numWholeIntervals = range / INTERVAL_PER_THREAD;
+		Long remainder = range % INTERVAL_PER_THREAD;
 		
 		for (Long i = 0L; i < numWholeIntervals; i++) {
-			subranges.add(new SubRange(rangeMin + i*intervalPerThread, rangeMin + (i + 1)*intervalPerThread));
+			subranges.add(new SubRange(rangeMin + i*INTERVAL_PER_THREAD, rangeMin + (i + 1)*INTERVAL_PER_THREAD));
 		}
 		if (remainder > 0L) {
-			subranges.add(new SubRange(rangeMin + (numWholeIntervals)*intervalPerThread, rangeMax));
+			subranges.add(new SubRange(rangeMin + (numWholeIntervals)*INTERVAL_PER_THREAD, rangeMax));
 		}
 		return subranges;
 	}
@@ -161,6 +192,7 @@ public class PrimesInRangeHelper {
 				}
 			}, executor);
 			futures.add(future);
+			logger.info("task scheduled and future created");
 		});
 		return futures;
 	}
@@ -170,9 +202,7 @@ public class PrimesInRangeHelper {
 		logger.info("appendComputedPrimesToResult is called");
 		try {
 			var currentPrimes = primesInRangeTask.getPrimes();
-			logger.info("found that primes is currently: " + currentPrimes.toString());
 			currentPrimes.addAll(primes);
-			logger.info("added primes: " + primes.toString());
 			taskRepository.save(primesInRangeTask);
 		} catch (Exception e) {
 			logger.error("encountered an error while saving primes:", e);
@@ -189,6 +219,11 @@ public class PrimesInRangeHelper {
 	@Transactional
 	private synchronized void markTaskStatusError(PrimesInRangeTask primesInRangeTask) {
 		primesInRangeTask.setTaskStatus(TaskStatus.ERROR);
+	}
+	
+	@Transactional
+	private synchronized void markTaskStatusCancelled(PrimesInRangeTask primesInRangeTask) {
+		primesInRangeTask.setTaskStatus(TaskStatus.CANCELLED);
 	}
 }
 

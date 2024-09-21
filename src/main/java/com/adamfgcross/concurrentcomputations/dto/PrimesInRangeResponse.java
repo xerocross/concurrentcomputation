@@ -17,6 +17,7 @@ public class PrimesInRangeResponse extends TaskResponse {
 		this.setRangeMin(Optional.ofNullable(primesInRangeTask.getRangeMin()).map(v -> v.toString()).orElse(""));
 		this.setPrimes(primesInRangeTask.getPrimes().stream().toList());
 		this.setIsCompleted(primesInRangeTask.getIsCompleted());
+		this.setTaskStatus(primesInRangeTask.getTaskStatus().toString());
 	}
 
 	public String getRangeMin() {
@@ -38,6 +39,16 @@ public class PrimesInRangeResponse extends TaskResponse {
 	private String rangeMin;
 	private String rangeMax;
 	private List<String> primes = new ArrayList<>();
+
+	private String taskStatus;
+	
+	public String getTaskStatus() {
+		return taskStatus;
+	}
+
+	public void setTaskStatus(String taskStatus) {
+		this.taskStatus = taskStatus;
+	}
 
 	public List<String> getPrimes() {
 		return primes;
