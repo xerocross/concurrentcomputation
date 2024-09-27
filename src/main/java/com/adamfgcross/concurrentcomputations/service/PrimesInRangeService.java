@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
@@ -20,27 +21,22 @@ import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeResponse;
 import com.adamfgcross.concurrentcomputations.helper.PrimesInRangeHelper;
 import com.adamfgcross.concurrentcomputations.repository.TaskRepository;
 
+
 @Service
 public class PrimesInRangeService {
 	
 	private TaskRepository taskRepository;
 	private PrimesInRangeHelper primesInRangeHelper;
-	private TaskStoreService<List<String>> primesInRangeTaskStoreService;
 	
 	private final Executor executor;
-	
-	@Autowired
-	private TaskStoreService<Void> dbUpdateTaskStoreService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(PrimesInRangeService.class);
 	
 	public PrimesInRangeService(TaskRepository taskRepository,
 			PrimesInRangeHelper primesInRangeHelper,
-			TaskStoreService<List<String>> taskStoreService,
 			Executor executor) {
 		this.taskRepository = taskRepository;
 		this.primesInRangeHelper = primesInRangeHelper;
-		this.primesInRangeTaskStoreService = taskStoreService;
 		this.executor = executor;
 	}
 	
@@ -58,6 +54,7 @@ public class PrimesInRangeService {
 		}
 	}
 	
+	@Transactional
 	public Optional<PrimesInRangeResponse> cancelTask(Long id) {
 		Optional<Task> taskOptional = taskRepository.findById(id);
 		logger.info("attempting to cancel task:");
@@ -74,6 +71,7 @@ public class PrimesInRangeService {
 		return taskResponse;
 	}
 	
+	@Transactional
 	public PrimesInRangeTask initiatePrimesInRangeTask(User user, PrimesInRangeRequest primesInRangeRequest) {
 		PrimesInRangeTask primesInRangeTask = new PrimesInRangeTask();
 		primesInRangeTask.setRangeMax(primesInRangeRequest.getRangeMax());
@@ -84,6 +82,7 @@ public class PrimesInRangeService {
 		return primesInRangeTask;
 	}
 	
+	@Transactional
 	private void startComputation(PrimesInRangeTask primesInRangeTask) {
 		PrimesInRangeTaskContext primesInRangeTaskContext = new PrimesInRangeTaskContext();
 		primesInRangeTaskContext.setRangeMax(primesInRangeTask.getRangeMax());
@@ -94,25 +93,16 @@ public class PrimesInRangeService {
 				logger.info("finished computing primes");
 			});
 	}
-
-	synchronized void markComplete(PrimesInRangeTaskContext primesInRangeTaskContext) {
-		var task = primesInRangeTaskContext.getPrimesInRangeTask();
-		task.setIsCompleted(true);
-		taskRepository.save(task);
-	}
 	
+	@Transactional
 	private CompletableFuture<Void> initiateComputation(PrimesInRangeTaskContext primesInRangeTaskContext) {
 		logger.info("initiate computation");
 		return CompletableFuture.runAsync(() -> computePrimesInRange(primesInRangeTaskContext), executor);
 	}
 	
+	@Transactional
 	private void computePrimesInRange(PrimesInRangeTaskContext primesInRangeTaskContext) {
 		primesInRangeHelper.computePrimesInRange(primesInRangeTaskContext);
 	}
-	
-	
-	synchronized void appendComputedPrimesToResult(PrimesInRangeTask primesInRangeTask, List<String> primes) {
-		primesInRangeTask.getPrimes().addAll(primes);
-		taskRepository.save(primesInRangeTask);
-	}
+
 }
