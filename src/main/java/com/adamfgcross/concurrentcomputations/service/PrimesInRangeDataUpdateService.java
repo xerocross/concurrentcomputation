@@ -55,6 +55,15 @@ public class PrimesInRangeDataUpdateService {
 	}
 	
 	@Transactional
+	public synchronized void markTaskStatusScheduled(Long taskId) {
+		taskRepository.findById(taskId).map(task -> (PrimesInRangeTask) task)
+		.ifPresent(task -> {
+			task.setTaskStatus(TaskStatus.SCHEDULED);
+			taskRepository.save(task);
+		});
+	}
+	
+	@Transactional
 	public synchronized void markTaskStatusCancelled(Long taskId) {
 		taskRepository.findById(taskId).map(task -> (PrimesInRangeTask) task)
 		.ifPresent(task -> {

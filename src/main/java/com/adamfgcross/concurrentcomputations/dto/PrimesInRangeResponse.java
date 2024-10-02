@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
+import com.adamfgcross.concurrentcomputations.domain.TaskStatus;
 
 public class PrimesInRangeResponse extends TaskResponse {
 	
@@ -17,7 +18,7 @@ public class PrimesInRangeResponse extends TaskResponse {
 		this.setRangeMin(Optional.ofNullable(primesInRangeTask.getRangeMin()).map(v -> v.toString()).orElse(""));
 		this.setPrimes(primesInRangeTask.getPrimes().stream().toList());
 		this.setIsCompleted(primesInRangeTask.getIsCompleted());
-		this.setTaskStatus(primesInRangeTask.getTaskStatus().toString());
+		this.setTaskStatus(Optional.ofNullable(primesInRangeTask.getTaskStatus()).map(TaskStatus::toString).orElse(""));
 	}
 
 	public String getRangeMin() {

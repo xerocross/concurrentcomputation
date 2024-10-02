@@ -1,20 +1,17 @@
 package com.adamfgcross.concurrentcomputations.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTask;
 import com.adamfgcross.concurrentcomputations.domain.PrimesInRangeTaskContext;
 import com.adamfgcross.concurrentcomputations.domain.Task;
-import com.adamfgcross.concurrentcomputations.domain.TaskStatus;
 import com.adamfgcross.concurrentcomputations.domain.User;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeRequest;
 import com.adamfgcross.concurrentcomputations.dto.PrimesInRangeResponse;
@@ -54,7 +51,6 @@ public class PrimesInRangeService {
 		}
 	}
 	
-	@Transactional
 	public Optional<PrimesInRangeResponse> cancelTask(Long id) {
 		Optional<Task> taskOptional = taskRepository.findById(id);
 		logger.info("attempting to cancel task:");
